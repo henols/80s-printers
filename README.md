@@ -1,5 +1,11 @@
 # Nakajima NP-2200 9 pin matrix printer
 
+The Nakajima NP-2200 is a 9-pin dot matrix printer from the mid-1980s, representing the era when impact printers dominated computer peripherals. Built by Nakajima Precision Co., Ltd. (a company known for precision mechanical devices), this printer exemplifies the embedded system design philosophy of the early microcomputer age—using dedicated microcontrollers with minimal external components to achieve specific functionality.
+
+## Visual Documentation
+
+For detailed photographs of the PCB and components, see **[PICTURES.md](PICTURES.md)**.
+
 ## NP-2200-2 Board — Summary
 
 ### Identification / markings
@@ -39,7 +45,7 @@
 | IC101 | D8049HC 055 | NEC | 8049 MCU (MCS-48) | Main controller | DIP-40 | — |
 | IC102 | D8155C-2 | NEC | 8155 | RAM + I/O + timer | DIP-40 | — |
 | IC103 | D8255AC-2 | NEC | 8255 PPI | Programmable peripheral interface | DIP-40 | — |
-| IC104 | MBM27128K (sticker: "NP-2200 D0000403") | Fujitsu | 27128 EPROM | Char rom | DIP-28 (socket) | VER 4.03-U '84 B   Dip Sw  |
+| IC104 | MBM27128K (sticker: "NP-2200 D0000403") | Fujitsu | 27128 EPROM | Char rom ([ROM dump](rom/NP-2200_D0000403.bin)) | DIP-28 (socket) | VER 4.03-U '84 B   Dip Sw  |
 | IC105 | D4016CX-20 | NEC | 4016 SRAM | 2 KB × 8 static RAM | DIP-24 | — |
 | IC106 | HD74LS373P | Hitachi | 74LS373 | Octal transparent latch | DIP-20 | — |
 | IC107 | HD74LS02P | Hitachi | 74LS02 | Quad 2-input NOR | DIP-14 | — |
@@ -59,7 +65,7 @@
 |---|---|---|---|
 | CN101 | Dual-row pin header | 26 (2×13) | Power / Print head |
 | CN102 | Centronics | 36 | Parallel port |
-| CN103 | IDC box header (shrouded), dual-row | 20 (2×10) | Interface port (see Layout) |
+| CN103 | IDC box header (shrouded), dual-row | 20 (2×10) | Interface port ([see pinout](#cn103-pinout-20-pin-idc-box-header)) |
 | CN104 | JST-style vertical friction-lock header (white) | 7 | Motor control? |
 | CN105 | JST-style vertical friction-lock header (white) | 10 | Control pannel? |
 | CN106 | Mini JST-style vertical header (white) | 2 | Cover closed switch |
@@ -67,27 +73,57 @@
 
 ---
 
-### CN103 Layout
+### CN103 Pinout (20-pin IDC Box Header)
 
-| pin | Centronics signal | Notes |
-|---|---|---|
-| 1 |  /STROBE | — |
-| 2 |  D0 | — |
-| 3 |  D1 | — |
-| 4 |  D2 | — |
-| 5 |  D3 | — |
-| 6 |  D4 | — |
-| 7 |  D5 | — |
-| 8 |  D6 | — |
-| 9 |  D7 | — |
-| 10 | /ACK | — |
-| 11 | BUSY ?| — |
-| 12 | PE (Paper Empty) ?| — |
-| 13 | SELECT ?| — |
-| 14 | /AUTOFEED ?| — |
-| 15 | /ERROR (Fault) ?| — |
-| 16 | /INIT ?| — |
-| 17 | +5 V | — |
-| 18 | GND | — |
-| 19 | /SLCTIN ?| — |
-| 20 | GND | — |
+**Layout is not confirmed**
+| Signal | Pin | Pin | Signal |
+|---|---|---|---|
+| /STROBE | 1 ● | ● 2 | D0 |
+| D1 | 3 ● | ● 4 | D2 |
+| D3 | 5 ● | ● 6 | D4 |
+| D5 | 7 ● | ● 8 | D6 |
+| D7 | 9 ● | ● 10 | /ACK |
+| BUSY ? | 11 ● | ● 12 | PE (Paper Empty) ? |
+| SELECT ? | 13 ● | ● 14 | /AUTOFEED ? |
+| /ERROR (Fault) ? | 15 ● | ● 16 | /INIT ? |
+| +5V | 17 ● | ● 18 | GND |
+| /SLCTIN ? | 19 ● | ● 20 | GND |
+
+---
+
+## Board Specifications
+
+### Physical Characteristics
+- **PCB Dimensions**: *[To be measured]*
+- **Component Height**: *[To be measured]*
+- **Mounting**: *[Standard mounting holes/brackets - TBD]*
+
+### Power Requirements
+- **Supply Voltage**: +5V DC *(typical for TTL/CMOS logic of this era)*
+- **Current Draw**: *[To be measured]*
+- **Power Connectors**: Via CN101 26-pin header
+
+### Environmental
+- **Operating Temperature**: *[Typical commercial range - TBD]*
+- **Storage Temperature**: *[TBD]*
+- **Humidity**: *[TBD]*
+
+---
+
+## References
+
+### Datasheets and Technical Documentation
+- **NEC D8049** - MCS-48 Family User's Manual
+- **NEC D8155** - RAM-I/O-Timer Datasheet  
+- **NEC D8255** - Programmable Peripheral Interface Datasheet
+- **Fujitsu MBM27128K** - 128K EPROM Datasheet
+- **Sanyo LB1234** - Driver IC Datasheet *(if available)*
+
+### Service Information
+- **Service Manual**: *[Not currently available]*
+- **Parts Lists**: *[Not currently available]*
+- **Schematic Diagrams**: *[Not currently available - reverse engineering needed]*
+
+### Related Documentation
+- **Centronics Parallel Interface Standard** - IEEE 1284 predecessor
+- **MCS-48 Application Notes** - Intel/NEC development guides
