@@ -75,19 +75,19 @@ For detailed photographs of the PCB and components, see **[pictures](PICTURES.md
 
 ### CN103 Pinout (20-pin IDC Box Header)
 
-**Layout is not confirmed**
-| Signal | Pin | Pin | Signal |
-|---|---|---|---|
-| /STROBE | 1 ● | ● 2 | D0 |
-| D1 | 3 ● | ● 4 | D2 |
-| D3 | 5 ● | ● 6 | D4 |
-| D5 | 7 ● | ● 8 | D6 |
-| D7 | 9 ● | ● 10 | /ACK |
-| BUSY ? | 11 ● | ● 12 | PE (Paper Empty) ? |
-| SELECT ? | 13 ● | ● 14 | /AUTOFEED ? |
-| /ERROR (Fault) ? | 15 ● | ● 16 | /INIT ? |
-| +5V | 17 ● | ● 18 | GND |
-| /SLCTIN ? | 19 ● | ● 20 | GND |
+*Layout is not confirmed*
+| Signal | I/O | Pin | Pin | I/O | Signal |
+|---|---|---|---|---|---|
+| /STROBE | IN | 1 ● | ● 2 | IN | D0 |
+| D1 | IN | 3 ● | ● 4 | IN | D2 |
+| D3 | IN | 5 ● | ● 6 | IN | D4 |
+| D5 | IN | 7 ● | ● 8 | IN | D6 |
+| D7 | IN | 9 ● | ● 10 | OUT | /ACK |
+| BUSY ? | OUT | 11 ● | ● 12 | OUT | PE (Paper Empty) ? |
+| SELECT ? | OUT | 13 ● | ● 14 | IN | /AUTOFEED ? |
+| /ERROR (Fault) ? | OUT | 15 ● | ● 16 | IN | /RESET ? |
+| +5V | PWR | 17 ● | ● 18 | PWR | GND |
+| /SLCTIN ? | IN | 19 ● | ● 20 | PWR | GND |
 
 ---
 
