@@ -1,10 +1,10 @@
-# Nakajima NP-2200 9 pin matrix printer
+# Microprint Model NP-2200 9 pin matrix printer
 
-The Nakajima NP-2200 is a 9-pin dot matrix printer from the mid-1980s, representing the era when impact printers dominated computer peripherals. Built by Nakajima Precision Co., Ltd. (a company known for precision mechanical devices), this printer exemplifies the embedded system design philosophy of the early microcomputer age—using dedicated microcontrollers with minimal external components to achieve specific functionality.
+The Microprint Model NP-2200 is a 9-pin dot matrix printer from the mid-1980s, representing the era when impact printers dominated computer peripherals. Built by Nakajima Precision Co., Ltd. (a company known for precision mechanical devices), this printer exemplifies the embedded system design philosophy of the early microcomputer age—using dedicated microcontrollers with minimal external components to achieve specific functionality.
 
-## Visual Documentation
-
-For detailed photographs of the PCB and components, see **[PICTURES.md](PICTURES.md)**.
+---
+![Printer Unit](pictures/microprint_model_NP-2200.png)
+For detailed photographs of the PCB and components, see **[pictures](PICTURES.md)**.
 
 ## NP-2200-2 Board — Summary
 

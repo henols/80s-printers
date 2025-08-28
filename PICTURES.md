@@ -1,16 +1,20 @@
-# Nakajima NP-2200 Pictures
+# Microprint Model NP-2200 Pictures
 
-This page contains photographs of the Nakajima NP-2200 9-pin matrix printer and its components.
+This page contains photographs of the Microprint Model NP-2200 9-pin matrix printer and its components.
+## Printer Unit
+![Printer Unit](pictures/microprint_model_NP-2200.png)
+
+*Microprint Model NP-2200 9-pin matrix printer*
 
 ## Main Board - Top Side
 
 ### Primary View
-![Main Board Top Side (Alternative View)](pictures/main-board-top-side~2.jpg)
+![Main Board Top Side](pictures/main-board-top-side~2.jpg)
 
 *Top side of the NP-2200-2 main board showing component layout, ICs, connectors, and identification markings.*
 
 ### Alternative View
-![Main Board Top Side](pictures/main-board-top-side.jpg)
+![Main Board Top Side (Alternative View)](pictures/main-board-top-side.jpg)
 
 *Alternative angle of the main board top side for component identification.*
 
@@ -20,6 +24,3 @@ This page contains photographs of the Nakajima NP-2200 9-pin matrix printer and 
 
 *Bottom side of the NP-2200-2 main board showing solder traces, component mounting, and PCB construction.*
 
-## Printer Unit
-
-*Pictures of the complete printer unit will be added later.*
