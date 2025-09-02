@@ -83,12 +83,13 @@ For detailed photographs of the PCB and components, see **[pictures](PICTURES.md
 | D3 | IN | 5 ● | ● 6 | IN | D4 |
 | D5 | IN | 7 ● | ● 8 | IN | D6 |
 | D7 | IN | 9 ● | ● 10 | OUT | /ACK |
-| BUSY ? | OUT | 11 ● | ● 12 | OUT | PE (Paper Empty) ? |
-| SELECT ? | OUT | 13 ● | ● 14 | IN | /AUTOFEED ? |
-| /ERROR (Fault) ? | OUT | 15 ● | ● 16 | IN | /RESET ? |
+| BUSY | OUT | 11 ● | ● 12 | OUT | PE (Paper Empty) |
+| SELECT (on  line) | OUT | 13 ● | ● 14 | OUT | /ERROR (Fault) |
+| /RESET | IN | 15 ● | ● 16 | ? |  ? |
 | +5V | PWR | 17 ● | ● 18 | PWR | GND |
-| /SLCTIN ? | IN | 19 ● | ● 20 | PWR | GND |
+| +12V ? | PWR ? | 19 ● | ● 20 | PWR | GND |
 
+/AUTOFEED ?
 ---
 
 ## Board Specifications
@@ -102,11 +103,6 @@ For detailed photographs of the PCB and components, see **[pictures](PICTURES.md
 - **Supply Voltage**: +5V DC *(typical for TTL/CMOS logic of this era)*
 - **Current Draw**: *[To be measured]*
 - **Power Connectors**: Via CN101 26-pin header
-
-### Environmental
-- **Operating Temperature**: *[Typical commercial range - TBD]*
-- **Storage Temperature**: *[TBD]*
-- **Humidity**: *[TBD]*
 
 ---
 

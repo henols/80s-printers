@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>FX-80 Glyph Grid Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Tailwind for quick styling (optional). If offline, app still works, just looks plain. -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    html, body { background: #f8fafc; }
+    canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- React 18 UMD + Babel for inline JSX. Works from a single HTML file. -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+    const { useEffect, useMemo, useRef, useState } = React;
+
+    // ------------------- Constants -------------------
+    const CELL_COLS = 11;             // FX-80 draft glyph width (columns)
+    const CELL_ROWS = 8;              // visible vertical dots from ROM plane
+    const BANK_SIZE = 256 * 16;       // 4096 bytes per FX-80 bank (256 glyphs × 16 bytes)
+
+    // ------------------- Utils -------------------
+    const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+
+    // Convert C64 8×8 row bytes (MSB=leftmost by default) -> 8 column bytes (bit0=top)
+    function c64RowsToCols8(rows, msbLeft = true) {
+      const cols = new Array(8).fill(0);
+      for (let x = 0; x < 8; x++) {
+        let col = 0;
+        for (let y = 0; y < 8; y++) {
+          const bitIndex = msbLeft ? (7 - x) : x;
+          const on = (rows[y] >> bitIndex) & 1;
+          if (on) col |= (1 << y);
+        }
+        cols[x] = col & 0xff;
+      }
+      return cols;
+    }
+
+    // Nearest-neighbor resample columns
+    function scaleColumns(srcCols, dstCols) {
+      const n = srcCols.length;
+      if (dstCols <= 0) return [];
+      if (dstCols === n) return srcCols.slice();
+      const out = [];
+      for (let i = 0; i < dstCols; i++) {
+        let idx = Math.floor(((i + 0.5) * n) / dstCols);
+        if (idx >= n) idx = n - 1;
+        out.push(srcCols[idx]);
+      }
+      return out;
+    }
+
+    // Trim blank edge columns
+    function trimBlankEdges(cols, maxTrim) {
+      const isBlank = (b) => (b & 0xff) === 0;
+      let left = 0; while (left < cols.length && isBlank(cols[left])) left++;
+      let right = cols.length - 1; while (right >= 0 && isBlank(cols[right])) right--;
+      if (right < left) return { trimmed: cols.slice(), tLeft: 0, tRight: 0 };
+      const tLeft = Math.min(left, maxTrim);
+      const tRight = Math.min(cols.length - 1 - right, maxTrim);
+      return { trimmed: cols.slice(tLeft, cols.length - tRight), tLeft, tRight };
+    }
+
+    // ------------------- Canvas drawing -------------------
+    function drawGlyphCanvas(canvas, columns, { px = 8, showGrid = false } = {}) {
+      const w = CELL_COLS * px, h = CELL_ROWS * px;
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext("2d", { alpha: false });
+      ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = "#111827";
+      for (let x = 0; x < CELL_COLS; x++) {
+        const colByte = columns[x] || 0;
+        for (let y = 0; y < CELL_ROWS; y++) {
+          if ((colByte >> y) & 1) ctx.fillRect(x * px, y * px, px, px);
+        }
+      }
+      if (showGrid) {
+        ctx.strokeStyle = "#e5e7eb"; ctx.lineWidth = 1;
+        for (let gx = 0; gx <= CELL_COLS; gx++) {
+          const x = gx * px + 0.5;
+          ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+        }
+        for (let gy = 0; gy <= CELL_ROWS; gy++) {
+          const y = gy * px + 0.5;
+          ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+        }
+      }
+    }
+
+    function GlyphCanvas({ columns, px, showGrid }) {
+      const ref = useRef(null);
+      useEffect(() => { if (ref.current) drawGlyphCanvas(ref.current, columns, { px, showGrid }); }, [columns, px, showGrid]);
+      return <canvas ref={ref} className="rounded bg-white shadow" />;
+    }
+
+    // ------------------- Data sources -------------------
+    // Load an FX-80 image and pick a 4 KB bank
+    function useFX80Bank(bytes, bankIndex = 0) {
+      return useMemo(() => {
+        if (!bytes) return null;
+        const bankCount = Math.floor(bytes.length / BANK_SIZE);
+        const idx = clamp(bankIndex, 0, Math.max(0, bankCount - 1));
+        const start = idx * BANK_SIZE;
+        const view = bytes.subarray(start, start + BANK_SIZE);
+        const colsByCode = new Array(256);
+        for (let code = 0; code < 256; code++) {
+          const off = code * 16;
+          const cols = new Array(CELL_COLS);
+          for (let c = 0; c < CELL_COLS; c++) cols[c] = view[off + c] || 0;
+          colsByCode[code] = cols;
+        }
+        return { colsByCode, bankCount, activeBank: idx };
+      }, [bytes, bankIndex]);
+    }
+
+    // Interpret a C64 ROM (2/4 KiB), apply trim/scale/pad -> 11 columns
+    function useC64Set(bytes, setIndex = 0, { msbLeft = true, autoTrim = 2, scaleTo = 10, leftPad = 1, rightPad = 0 } = {}) {
+      return useMemo(() => {
+        if (!bytes) return null;
+        let b = bytes;
+        if (b.length === 2048) { // duplicate to 4k
+          const tmp = new Uint8Array(4096); tmp.set(b,0); tmp.set(b,2048); b = tmp;
+        }
+        if (b.length < 4096) return null;
+        const start = setIndex === 1 ? 2048 : 0;
+        const set = b.subarray(start, start + 2048);
+        const colsByCode = new Array(256);
+
+        for (let code = 0; code < 256; code++) {
+          const rows = set.subarray(code * 8, code * 8 + 8);
+          let cols8 = c64RowsToCols8(rows, msbLeft);
+          if (autoTrim > 0) cols8 = trimBlankEdges(cols8, autoTrim).trimmed;
+          const targetW = clamp(scaleTo ?? cols8.length, 1, CELL_COLS);
+          let cols = (scaleTo != null) ? scaleColumns(cols8, targetW) : cols8.slice();
+          let lp = leftPad, rp = rightPad;
+          if (lp + targetW + rp > CELL_COLS) { const spare = Math.max(0, CELL_COLS - targetW); lp = Math.floor(spare/2); rp = spare - lp; }
+          const padded = [ ...new Array(lp).fill(0), ...cols, ...new Array(CELL_COLS - (lp + cols.length)).fill(0) ];
+          colsByCode[code] = padded;
+        }
+        return { colsByCode };
+      }, [bytes, setIndex, msbLeft, autoTrim, scaleTo, leftPad, rightPad]);
+    }
+
+    // ------------------- App -------------------
+    function App() {
+      const [fileBytes, setFileBytes] = useState(null);      // Uint8Array
+      const [mode, setMode] = useState("fx80");              // "fx80" | "c64"
+      const [bankIndex, setBankIndex] = useState(0);
+      const [zoom, setZoom] = useState(8);
+      const [showGrid, setShowGrid] = useState(false);
+      const [range, setRange] = useState({ start: 32, end: 255 });
+      const [codesPerRow, setCodesPerRow] = useState(16);
+      const [interGapCols, setInterGapCols] = useState(0);
+
+      // Page/preview toggles (simulate ESC W / ESC w)
+      const [doubleW, setDoubleW] = useState(false);  // ESC W
+      const [doubleH, setDoubleH] = useState(false);  // ESC w
+      const [sampleText, setSampleText] = useState("ABC abc 0123 ÅÄÖ åäö ▓║═┐");
+
+      // Page simulation controls
+      const [pageChars, setPageChars] = useState(80);   // chars per line @ 10 cpi baseline
+      const [pageLines, setPageLines] = useState(66);   // lines per page @ 6 lpi on 11"
+      const [pageText, setPageText]   = useState("The quick brown fox jumps over the lazy dog. 0123456789 ÅÄÖ åäö\n\nRepeat this paragraph to fill the page…\n");
+      const [wrapText, setWrapText]   = useState(true);
+
+      // C64 interpretation options
+      const [c64Set, setC64Set] = useState(0);
+      const [msbLeft, setMsbLeft] = useState(true);
+      const [autoTrim, setAutoTrim] = useState(2);
+      const [scaleTo, setScaleTo] = useState(10);      // 8..11 looks good
+      const [leftPad, setLeftPad] = useState(1);
+      const [rightPad, setRightPad] = useState(0);
+
+      // Export options
+      const [exportChip, setExportChip] = useState("27128"); // 2732 | 27128 | 27512
+      const [exportBank, setExportBank] = useState(0);
+      const [repeatAll, setRepeatAll]   = useState(true);
+      const [exportName, setExportName] = useState("fx80.bin");
+
+      const fx  = useFX80Bank(fileBytes, bankIndex);
+      const c64 = useC64Set(fileBytes, c64Set, { msbLeft, autoTrim, scaleTo, leftPad, rightPad });
+
+      const colsByCode = mode === "fx80" ? fx?.colsByCode : c64?.colsByCode;
+      const bankCount  = mode === "fx80" && fileBytes ? Math.max(1, Math.floor(fileBytes.length / BANK_SIZE)) : 1;
+
+      function onFile(e) {
+        const f = e.target.files?.[0];
+        if (!f) return;
+        f.arrayBuffer().then((buf) => {
+          const u8 = new Uint8Array(buf);
+          setFileBytes(u8);
+          // guess mode by size
+          if (u8.length % BANK_SIZE === 0 && u8.length >= BANK_SIZE) setMode("fx80");
+          else setMode("c64");
+          setBankIndex(0);
+        });
+      }
+
+      const codeList = useMemo(() => {
+        const start = clamp(range.start, 0, 255);
+        const end = clamp(range.end, 0, 255);
+        const arr = [];
+        for (let c = start; c <= end; c++) arr.push(c);
+        return arr;
+      }, [range.start, range.end]);
+
+      // --------- Export .bin ----------
+      function buildBankFromCols(cols) {
+        const bank = new Uint8Array(BANK_SIZE);
+        for (let code = 0; code < 256; code++) {
+          const glyph = cols[code] || new Array(CELL_COLS).fill(0);
+          const off = code * 16;
+          for (let i = 0; i < CELL_COLS; i++) bank[off + i] = glyph[i] & 0xFF;
+          for (let i = CELL_COLS; i < 16; i++) bank[off + i] = 0x00;
+        }
+        return bank;
+      }
+      function chipSizeOf(kind) {
+        if (kind === "2732") return 4096;
+        if (kind === "27128") return 16384;
+        if (kind === "27512") return 65536;
+        return 16384;
+      }
+      function downloadBlob(bytes, name) {
+        const blob = new Blob([bytes], { type: "application/octet-stream" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = name || "fx80.bin"; a.click();
+        URL.revokeObjectURL(url);
+      }
+      function onExportBin() {
+        if (!colsByCode) return;
+        const bank = buildBankFromCols(colsByCode);
+        const chipSize = chipSizeOf(exportChip);
+        const image = new Uint8Array(chipSize);
+        image.fill(0x00);
+        const maxBanks = Math.floor(chipSize / BANK_SIZE);
+        const b = clamp(exportBank, 0, Math.max(0, maxBanks - 1));
+        image.set(bank, b * BANK_SIZE);
+        if (repeatAll) {
+          const pageSize = Math.min(16384, chipSize);
+          for (let off = pageSize; off < chipSize; off += pageSize) {
+            image.set(image.subarray(0, pageSize), off);
+          }
+        }
+        downloadBlob(image, exportName || "fx80.bin");
+      }
+
+      // --------- Line Preview (ESC W / ESC w) ----------
+      const previewRef = useRef(null);
+      useEffect(() => {
+        if (!colsByCode || !previewRef.current) return;
+        const px = zoom;
+        const cols = CELL_COLS + interGapCols;
+        const scaleX = doubleW ? 2 : 1;
+        const scaleY = doubleH ? 2 : 1;
+        const textCodes = Array.from(sampleText, (ch) => ch.charCodeAt(0) & 0xff);
+
+        const widthCols = cols * textCodes.length * scaleX;
+        const w = widthCols * px;
+        const h = CELL_ROWS * px * scaleY;
+        const cvs = previewRef.current;
+        cvs.width = w; cvs.height = h;
+        const ctx = cvs.getContext("2d");
+        ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = "#111827";
+
+        let cursorCol = 0;
+        for (let i = 0; i < textCodes.length; i++) {
+          const code = textCodes[i];
+          const glyph = colsByCode[code] || new Array(CELL_COLS).fill(0);
+          for (let x = 0; x < CELL_COLS; x++) {
+            const colByte = glyph[x] || 0;
+            for (let y = 0; y < CELL_ROWS; y++) {
+              if ((colByte >> y) & 1) {
+                const rx = (cursorCol + x * scaleX) * px;
+                const ry = (y * scaleY) * px;
+                ctx.fillRect(rx, ry, px * scaleX, px * scaleY);
+              }
+            }
+          }
+          cursorCol += (CELL_COLS + interGapCols) * scaleX;
+        }
+      }, [colsByCode, zoom, interGapCols, doubleW, doubleH, sampleText]);
+
+      // --------- Page Preview (ESC W / ESC w simulation) ----------
+      const pageRef = useRef(null);
+      useEffect(() => {
+        if (!colsByCode || !pageRef.current) return;
+        const px = zoom;
+        const scaleX = doubleW ? 2 : 1;
+        const scaleY = doubleH ? 2 : 1;
+
+        const charsPerLine = Math.max(1, Math.floor(pageChars / scaleX));
+        const linesPerPage = Math.max(1, Math.floor(pageLines / scaleY));
+        const colsPerChar = (CELL_COLS + interGapCols) * scaleX;
+
+        const widthPx = colsPerChar * charsPerLine * px;
+        const heightPx = CELL_ROWS * scaleY * linesPerPage * px;
+
+        const cvs = pageRef.current;
+        cvs.width = widthPx; cvs.height = heightPx;
+        const ctx = cvs.getContext("2d");
+        ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, widthPx, heightPx);
+        ctx.fillStyle = "#111827";
+
+        // wrap text by characters per line (approx)
+        const src = pageText.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+        let lines = src.split("\n");
+        if (wrapText) {
+          const wrapped = [];
+          for (const L of lines) {
+            let cur = L;
+            while (cur.length > 0) {
+              wrapped.push(cur.slice(0, charsPerLine));
+              cur = cur.slice(charsPerLine);
+            }
+            if (L.length === 0) wrapped.push("");
+          }
+          lines = wrapped;
+        }
+
+        let yLine = 0;
+        for (let li = 0; li < Math.min(lines.length, linesPerPage); li++) {
+          const s = lines[li];
+          const codes = Array.from(s, (ch) => ch.charCodeAt(0) & 0xff);
+          let cursorCol = 0;
+          const maxCodes = Math.min(codes.length, charsPerLine);
+          for (let i = 0; i < maxCodes; i++) {
+            const glyph = colsByCode[codes[i]] || new Array(CELL_COLS).fill(0);
+            for (let x = 0; x < CELL_COLS; x++) {
+              const colByte = glyph[x] || 0;
+              for (let y = 0; y < CELL_ROWS; y++) {
+                if ((colByte >> y) & 1) {
+                  const rx = (cursorCol + x * scaleX) * px;
+                  const ry = (yLine * CELL_ROWS * scaleY + y * scaleY) * px;
+                  ctx.fillRect(rx, ry, px * scaleX, px * scaleY);
+                }
+              }
+            }
+            cursorCol += (CELL_COLS + interGapCols) * scaleX;
+          }
+          yLine += 1;
+        }
+      }, [colsByCode, zoom, interGapCols, doubleW, doubleH, pageChars, pageLines, pageText, wrapText]);
+
+      // --------------- Render ---------------
+      const colsByCodePresent = !!colsByCode;
+
+      return (
+        <div className="mx-auto max-w-7xl p-4 md:p-6">
+          <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">FX-80 Glyph Grid Viewer</h1>
+          <p className="text-sm text-slate-600 mt-1">
+            Load an FX-80 bank (4 KB multiples) or a C64 char ROM (2/4 KB). Preview glyphs, simulate ESC W / ESC w, and export a .bin.
+          </p>
+
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Load & Mode */}
+            <div className="p-4 bg-white rounded-2xl shadow">
+              <h2 className="font-semibold mb-2">1) Load</h2>
+              <input type="file" onChange={(e)=>onFile(e)} className="block w-full text-sm" />
+              <div className="mt-3">
+                <label className="text-xs font-medium">Interpret as</label>
+                <div className="mt-1 flex gap-3 text-sm">
+                  <label className="flex items-center gap-2">
+                    <input type="radio" checked={mode==="fx80"} onChange={()=>setMode("fx80")} />
+                    FX-80 bank
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="radio" checked={mode==="c64"} onChange={()=>setMode("c64")} />
+                    C64 ROM
+                  </label>
+                </div>
+              </div>
+              {mode === "fx80" && (
+                <div className="mt-3">
+                  <label className="text-xs font-medium">Bank</label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <input type="number" className="w-24 border rounded px-2 py-1 text-sm"
+                           value={bankIndex} min={0} max={Math.max(0, bankCount-1)}
+                           onChange={(e)=>setBankIndex(parseInt(e.target.value||"0",10))} />
+                    <span className="text-xs text-slate-500">of {bankCount}</span>
+                  </div>
+                </div>
+              )}
+              {mode === "c64" && (
+                <div className="mt-3 space-y-2">
+                  <div className="flex items-center gap-3">
+                    <label className="text-xs font-medium">C64 Set</label>
+                    <select className="border rounded px-2 py-1 text-sm" value={c64Set} onChange={(e)=>setC64Set(parseInt(e.target.value,10))}>
+                      <option value={0}>Set 0</option>
+                      <option value={1}>Set 1</option>
+                    </select>
+                    <label className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" checked={!msbLeft} onChange={()=>setMsbLeft(!msbLeft)} />
+                      LSB is leftmost
+                    </label>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <label className="text-xs">Auto-trim
+                      <input type="number" className="w-full border rounded px-2 py-1 text-sm" value={autoTrim} min={0} max={3} onChange={(e)=>setAutoTrim(parseInt(e.target.value||"0",10))} />
+                    </label>
+                    <label className="text-xs">Scale to (cols)
+                      <input type="number" className="w-full border rounded px-2 py-1 text-sm" value={scaleTo} min={8} max={11} onChange={(e)=>setScaleTo(parseInt(e.target.value||"10",10))} />
+                    </label>
+                    <label className="text-xs">Left pad
+                      <input type="number" className="w-full border rounded px-2 py-1 text-sm" value={leftPad} min={0} max={3} onChange={(e)=>setLeftPad(parseInt(e.target.value||"0",10))} />
+                    </label>
+                    <label className="text-xs">Right pad
+                      <input type="number" className="w-full border rounded px-2 py-1 text-sm" value={rightPad} min={0} max={3} onChange={(e)=>setRightPad(parseInt(e.target.value||"0",10))} />
+                    </label>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* View / Export */}
+            <div className="p-4 bg-white rounded-2xl shadow">
+              <h2 className="font-semibold mb-2">2) View & Export</h2>
+              <div className="grid grid-cols-2 gap-2">
+                <label className="text-xs">Zoom (px/dot)
+                  <input type="range" min={4} max={16} value={zoom} onChange={(e)=>setZoom(parseInt(e.target.value,10))} className="w-full" />
+                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs">Show grid</label>
+                  <input type="checkbox" checked={showGrid} onChange={()=>setShowGrid(!showGrid)} />
+                </div>
+                <label className="text-xs">Inter-char gap (cols)
+                  <input type="number" className="w-full border rounded px-2 py-1 text-sm" value={interGapCols} min={0} max={3} onChange={(e)=>setInterGapCols(parseInt(e.target.value||"0",10))} />
+                </label>
+                <label className="text-xs">Codes per row
+                  <input type="number" className="w-full border rounded px-2 py-1 text-sm" value={codesPerRow} min={8} max={32} onChange={(e)=>setCodesPerRow(parseInt(e.target.value||"16",10))} />
+                </label>
+
+                <div className="col-span-2 border-t pt-3">
+                  <h3 className="font-medium mb-2">Export .bin (current visualization)</h3>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <label className="text-xs">Chip
+                      <select className="w-full border rounded px-2 py-1" value={exportChip} onChange={(e)=>setExportChip(e.target.value)}>
+                        <option value="2732">2732 (4 KiB)</option>
+                        <option value="27128">27128 (16 KiB)</option>
+                        <option value="27512">27512 (64 KiB)</option>
+                      </select>
+                    </label>
+                    <label className="text-xs">Bank (4 KiB)
+                      <input type="number" className="w-full border rounded px-2 py-1" value={exportBank} min={0} max={15} onChange={(e)=>setExportBank(parseInt(e.target.value||"0",10))} />
+                    </label>
+                    <label className="flex items-center gap-2 text-xs col-span-2">
+                      <input type="checkbox" checked={repeatAll} onChange={()=>setRepeatAll(!repeatAll)} />
+                      Repeat first 16 KiB page across chip
+                    </label>
+                    <label className="text-xs col-span-2">Filename
+                      <input type="text" className="w-full border rounded px-2 py-1" value={exportName} onChange={(e)=>setExportName(e.target.value)} />
+                    </label>
+                  </div>
+                  <button onClick={onExportBin} disabled={!colsByCodePresent}
+                          className="mt-2 inline-flex items-center justify-center px-3 py-1.5 rounded-xl bg-slate-900 text-white text-sm shadow disabled:opacity-50">
+                    Download .bin
+                  </button>
+                  <p className="text-xs text-slate-500 mt-1">Exports the glyphs exactly as shown (C64 input is trimmed/scaled/padded into an FX-80 bank).</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Line preview */}
+            <div className="p-4 bg-white rounded-2xl shadow">
+              <h2 className="font-semibold mb-2">3) Line Preview (ESC W / ESC w)</h2>
+              <div className="flex items-center gap-2 mb-2">
+                <input value={sampleText} onChange={(e)=>setSampleText(e.target.value)} className="flex-1 border rounded px-2 py-1 text-sm" />
+              </div>
+              <div className="flex items-center gap-4 text-sm mb-2">
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" checked={doubleW} onChange={()=>setDoubleW(!doubleW)} /> Double-width (ESC W)
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" checked={doubleH} onChange={()=>setDoubleH(!doubleH)} /> Double-height (ESC w)
+                </label>
+              </div>
+              <canvas id="linePreview" ref={previewRef} className="w-full bg-white rounded-2xl shadow border border-slate-200" />
+              <p className="text-xs text-slate-500 mt-2">Draft cell simulation (11×8). W/w scales horizontally/vertically.</p>
+            </div>
+          </div>
+
+          {/* Glyph Grid */}
+          <div className="mt-6">
+            <h2 className="font-semibold mb-2">Glyph Grid</h2>
+            {!colsByCodePresent && (
+              <p className="text-sm text-slate-600">Load a ROM to view glyphs. FX-80 banks are 4 KB; C64 sets are 2/4 KB.</p>
+            )}
+            {colsByCodePresent && (
+              <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${codesPerRow}, minmax(0, 1fr))` }}>
+                {Array.from((() => {
+                  const arr = [];
+                  for (let c = clamp(range.start,0,255); c <= clamp(range.end,0,255); c++) arr.push(c);
+                  return arr;
+                })()).map((code) => {
+                  const cols = colsByCode?.[code] || new Array(CELL_COLS).fill(0);
+                  return (
+                    <div key={code} className="p-2 bg-white rounded-xl shadow border border-slate-200 flex flex-col items-center">
+                      <GlyphCanvas columns={cols} px={zoom} showGrid={showGrid} />
+                      <div className="mt-2 text-[11px] text-slate-600">{String(code).padStart(3,' ')} / 0x{code.toString(16).toUpperCase().padStart(2,'0')}</div>
+                      <div className="text-xs font-mono text-slate-400 mt-1">{String.fromCharCode(code)}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Page Simulation */}
+          <div className="mt-8 p-4 bg-white rounded-2xl shadow">
+            <h2 className="font-semibold mb-2">Page Layout Simulation</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+              <label className="text-xs">Chars per line (base 10 cpi)
+                <input type="number" value={pageChars} onChange={(e)=>setPageChars(parseInt(e.target.value||"80",10))}
+                       className="w-full border rounded px-2 py-1" />
+              </label>
+              <label className="text-xs">Lines per page
+                <input type="number" value={pageLines} onChange={(e)=>setPageLines(parseInt(e.target.value||"66",10))}
+                       className="w-full border rounded px-2 py-1" />
+              </label>
+              <label className="flex items-center gap-2 text-xs col-span-2 md:col-span-1">
+                <input type="checkbox" checked={doubleW} onChange={()=>setDoubleW(!doubleW)} />
+                ESC W (double-width)
+              </label>
+              <label className="flex items-center gap-2 text-xs col-span-2 md:col-span-1">
+                <input type="checkbox" checked={doubleH} onChange={()=>setDoubleH(!doubleH)} />
+                ESC w (double-height)
+              </label>
+              <label className="flex items-center gap-2 text-xs col-span-2">
+                <input type="checkbox" checked={wrapText} onChange={()=>setWrapText(!wrapText)} />
+                Wrap lines
+              </label>
+              <label className="text-xs col-span-2">Page text
+                <textarea className="w-full h-32 border rounded px-2 py-1 font-mono text-xs"
+                          value={pageText} onChange={(e)=>setPageText(e.target.value)}></textarea>
+              </label>
+            </div>
+            <div className="mt-3">
+              <canvas ref={pageRef} className="w-full bg-white rounded-2xl shadow border border-slate-200" />
+              <p className="text-xs text-slate-500 mt-2">Approximate layout at draft resolution. Double-width/height reduce usable chars/line and lines/page accordingly.</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
