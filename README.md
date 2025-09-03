@@ -66,8 +66,8 @@ For detailed photographs of the PCB and components, see **[pictures](PICTURES.md
 | CN101 | Dual-row pin header | 26 (2×13) | Power / Print head |
 | CN102 | Centronics | 36 | Parallel port |
 | CN103 | IDC box header (shrouded), dual-row | 20 (2×10) | Interface port ([see pinout](#cn103-pinout-20-pin-idc-box-header)) |
-| CN104 | JST-style vertical friction-lock header (white) | 7 | Motor control? |
-| CN105 | JST-style vertical friction-lock header (white) | 10 | Control pannel? |
+| CN104 | JST-style vertical friction-lock header (white) | 7 | Matrix head possition switches |
+| CN105 | JST-style vertical friction-lock header (white) | 10 | Control pannel |
 | CN106 | Mini JST-style vertical header (white) | 2 | Cover closed switch |
 | CN107 | Mini JST-style vertical header (red) | 2  | Paper inserted switch |
 
