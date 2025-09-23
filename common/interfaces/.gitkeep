@@ -1,0 +1,7 @@
+# Interface Standards Documentation
+
+Place documentation for interface standards:
+- Centronics parallel interface specs
+- RS-232 serial interface
+- IEEE 1284 parallel port standard
+- Printer command languages (ESC/P, etc.)

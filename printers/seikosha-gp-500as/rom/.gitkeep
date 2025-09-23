@@ -1,0 +1,7 @@
+# ROM Dumps Directory
+
+Place ROM/EPROM dump files here:
+- Binary dumps (.bin)
+- Hex files (.hex)
+- Assembly listings (.asm)
+- Analysis notes (.txt, .md)

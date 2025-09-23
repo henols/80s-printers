@@ -1,0 +1,8 @@
+# Common Components Documentation
+
+Place documentation for frequently used components:
+- Microcontroller datasheets (8049, Z80, etc.)
+- Support chip datasheets (8155, 8255, etc.)
+- Driver IC specifications
+- Crystal/oscillator frequencies
+- Standard logic families (74LS, 74HC, etc.)
