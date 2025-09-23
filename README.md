@@ -25,40 +25,20 @@ This repository documents vintage dot matrix printers from the 1980s era, preser
 - Architecture: *To be documented*
 - Interface: *To be documented*
 
-## Repository Structure
-
-```
-80s-printers/
-├── printers/           # Individual printer documentation
-│   ├── nakajima-np-2200/
-│   ├── diconix-model-150/
-│   └── seikosha-gp-500as/
-├── common/            # Shared resources
-│   ├── connectors/    # Standard connector pinouts
-│   ├── interfaces/    # Centronics, serial, etc.
-│   └── components/    # Common ICs and components
-└── tools/             # Analysis tools and utilities
-```
-
 ## Common Resources
 
 ### Interfaces
 - **Centronics Parallel**: Standard 36-pin connector used by most printers
 - **Serial RS-232**: Alternative interface for some models
+  - [Generic RS-232 Adapter Design](common/interfaces/RS232_Adapter_Layout.md) - Jumperable DB9↔DB25 adapter with color-coded wiring
 
 ### Components
 - **NEC 8049 Family**: Popular MCU choice for printer controllers
 - **Intel 8255 PPI**: Programmable Peripheral Interface
 - **Intel 8155**: RAM + I/O + Timer combo chip
 
-## Contributing
-
-When documenting a new printer:
-1. Create a folder under `printers/[manufacturer-model]/`
-2. Include detailed hardware analysis in README.md
-3. Add ROM dumps to `rom/` subdirectory
-4. Include PCB photos in `pictures/` subdirectory
-5. Update this main README with printer details
+### Tools
+- [FX-80 Glyph Viewer](tools/fx80-viewer.html) - Browser-based ROM glyph visualization tool
 
 ## License
 

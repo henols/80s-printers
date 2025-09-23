@@ -1,5 +1,5 @@
 
-# RS‑232 Wiring Card (with 2×2 Blocks) — Using My Cable Palette
+# RS‑232 Wiring Card
 
 Colors available: **Black, Yellow, Blue, Brown, Grey, Purple, White, Pink**
 
@@ -125,8 +125,6 @@ Shunt locally as needed (e.g. DTR↔DSR, DSR↔DCD).
 [DTR Grey] [DSR Purple] [DCD Pink]
 ```
 Shunt if printer requires (e.g. DSR↔DCD).
-
----
 
 ---
 
