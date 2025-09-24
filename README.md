@@ -7,38 +7,22 @@ This repository documents vintage dot matrix printers from the 1980s era, preser
 ### Nakajima NP-2200
 **9-pin dot matrix printer with NEC 8049 MCU**
 - [Documentation](printers/nakajima-np-2200/)
-- Status: ✅ Documented
 - Architecture: NEC D8049HC + D8155 + D8255
 - Interface: Centronics parallel
 
 ### Diconix Model-150
 **Portable 9-pin dot matrix printer**
 - [Documentation](printers/diconix-model-150/)
-- Status: 📝 Template created
 - Architecture: *To be documented*
-- Interface: *To be documented*
+- Interface: Centronics parallel
 
 ### Seikosha GP-500AS
 **9-pin dot matrix printer**
 - [Documentation](printers/seikosha-gp-500as/)
-- Status: 📝 Template created
 - Architecture: *To be documented*
-- Interface: *To be documented*
+- Interface: Seriell
 
-## Repository Structure
 
-```
-80s-printers/
-├── printers/           # Individual printer documentation
-│   ├── nakajima-np-2200/
-│   ├── diconix-model-150/
-│   └── seikosha-gp-500as/
-├── common/            # Shared resources
-│   ├── connectors/    # Standard connector pinouts
-│   ├── interfaces/    # Centronics, serial, etc.
-│   └── components/    # Common ICs and components
-└── tools/             # Analysis tools and utilities
-```
 
 ## Common Resources
 
@@ -50,15 +34,6 @@ This repository documents vintage dot matrix printers from the 1980s era, preser
 - **NEC 8049 Family**: Popular MCU choice for printer controllers
 - **Intel 8255 PPI**: Programmable Peripheral Interface
 - **Intel 8155**: RAM + I/O + Timer combo chip
-
-## Contributing
-
-When documenting a new printer:
-1. Create a folder under `printers/[manufacturer-model]/`
-2. Include detailed hardware analysis in README.md
-3. Add ROM dumps to `rom/` subdirectory
-4. Include PCB photos in `pictures/` subdirectory
-5. Update this main README with printer details
 
 ## License
 
