@@ -90,8 +90,3 @@ The Seikosha GP-500AS uses a serial interface. For connection to modern PCs, use
 - **Block B (RTS/CTS):** Horizontal (crossed, Brown↔White)
 - **Block C (DTR/DSR):** Horizontal (straight per-signal, Grey↔Purple)
 - **Tie rows:** None (add Purple↔Pink on PR side if printer needs carrier)
-
-### Connection Notes
-- Verify printer's serial interface requirements before connecting
-- Test with multimeter to confirm proper signal routing
-- May require additional handshaking signals depending on printer firmware
