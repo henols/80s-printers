@@ -11,7 +11,7 @@ This repository documents vintage dot matrix printers from the 1980s era, preser
 - Interface: Centronics parallel
 
 ### Diconix Model-150
-**Portable 9-pin dot matrix printer**
+**Portable inkjet printer**
 - [Documentation](printers/diconix-model-150/)
 - Architecture: *To be documented*
 - Interface: Centronics parallel
