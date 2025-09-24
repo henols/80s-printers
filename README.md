@@ -28,7 +28,8 @@ This repository documents vintage dot matrix printers from the 1980s era, preser
 
 ### Interfaces
 - **Centronics Parallel**: Standard 36-pin connector used by most printers
-- **Serial RS-232**: Alternative interface for some models
+- **Serial RS-232**: Alternative interface for some models.
+  [Generic RS-232 adapter](../../common/interfaces/RS232_Adapter_Layout.md) 
 
 ### Components
 - **NEC 8049 Family**: Popular MCU choice for printer controllers
