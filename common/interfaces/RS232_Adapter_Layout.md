@@ -1,7 +1,4 @@
-
-# RS‑232 Wiring Card (with 2×2 Blocks) — Using My Cable Palette
-
-Colors available: **Black, Yellow, Blue, Brown, Grey, Purple, White, Pink**
+# Generic RS-232 adapter, Wiring Card
 
 Signal → Color assignment:  
 - **GND:** Black  
@@ -125,8 +122,6 @@ Shunt locally as needed (e.g. DTR↔DSR, DSR↔DCD).
 [DTR Grey] [DSR Purple] [DCD Pink]
 ```
 Shunt if printer requires (e.g. DSR↔DCD).
-
----
 
 ---
 
