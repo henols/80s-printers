@@ -1,7 +1,4 @@
-
-# RS‑232 Wiring Card
-
-Colors available: **Black, Yellow, Blue, Brown, Grey, Purple, White, Pink**
+# Generic RS-232 adapter, Wiring Card
 
 Signal → Color assignment:  
 - **GND:** Black  
