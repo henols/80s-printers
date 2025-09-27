@@ -10,24 +10,26 @@ For detailed photographs of the PCB and components, see **[PICTURES.md](PICTURES
 
 ### Identification / markings
 
-- Board ID: **[To be documented]**
-- PCB code: **[To be documented]**
-- Text: **[To be documented]**
+- Board ID: **Seikosha GP-LS RN3**
+- PCB code: **GP-500AT-2** (shared across GP-500 variants)
+- Text: **GP-DR-2 4G SEIKOSHA** (hybrid driver module)
 - Manufacturer: **Seikosha (Seiko Instruments)**
-- EPROM label: **[To be documented]**
+- EPROM label: **BASE -2** (HN482732AG-20)
 
 ### Architecture overview
 
-- Core: **[MCU to be identified]**
-- Program/storage: **[EPROM details to be documented]**
-- Glue logic: **[Logic family to be documented]**
-- Drivers: **[Driver ICs to be documented]**
-- Custom modules: **[Custom components to be documented]**
-- Clocking: **[Crystal/oscillator details to be documented]**
+- Core: **Intel 8039 MCU** (MCS-48 family)
+- Program/storage: **HN482732AG-20** (Hitachi 27256, 32KB EPROM)
+- Glue logic: **74LS series TTL** (SN7404N, 74LS00)
+- Drivers: **LB1233** (Sanyo motor driver), **GP-DR-2** (hybrid printhead driver)
+- Custom modules: **GP-DR-2 4G SEIKOSHA** (dot-matrix printhead driver)
+- Clocking: **[Crystal details to be documented]**
 
 ### Connectors (top-level)
 
-- **[Connector details to be documented]**
+- **DB-25**: RS-232C serial interface (Centronics-compatible pinout)
+- **Power**: On-board power supply section with fuses (T1.6A)
+- **Motor/Printhead**: Internal connections to stepper motors and printhead
 
 ### Configuration / service
 
@@ -40,7 +42,15 @@ For detailed photographs of the PCB and components, see **[PICTURES.md](PICTURES
 
 | RefDes | Exact top marking | Manufacturer | Part / Type | Function | Package | Notes |
 |---|---|---|---|---|---|---|
-| *[To be populated during analysis]* | | | | | | |
+| U1 | HN482732AG-20 | Hitachi | 27256 EPROM | Firmware storage (32KB) | DIP-28 | Label: "BASE -2" |
+| U2 | SRM2016C20 | Mitsubishi | 2K × 8 SRAM | Data buffer | DIP-24 | Static RAM |
+| U3 | HM3-6116-5 | Harris | 2K × 8 SRAM | Data buffer | DIP-24 | Static RAM |
+| U4 | MB842308-11 | Fujitsu | 8K × 8 Dual-port RAM | I/O buffer | DIP-28 | Shared memory |
+| U5 | LB1233 | Sanyo | Motor driver IC | Stepper motor control | DIP-16 | Printer mechanics |
+| U6 | SN7404N | Texas Instruments | Hex inverter | TTL glue logic | DIP-14 | Standard logic |
+| U7 | 74LS00 | Various | Quad NAND gate | TTL glue logic | DIP-14 | Standard logic |
+| M1 | GP-DR-2 4G | Seikosha | Hybrid driver module | Printhead driver | Custom | High-current driver |
+| Q1-Q3 | 2SB716 | Various | Power transistors | Power regulation | TO-220 | On heatsink |
 
 ### Connectors
 
@@ -58,9 +68,11 @@ For detailed photographs of the PCB and components, see **[PICTURES.md](PICTURES
 - **Mounting**: *[To be documented]*
 
 ### Power Requirements
-- **Supply Voltage**: *[To be documented]*
+- **Supply Voltage**: 5V logic + motor drive voltages (likely 24V)
 - **Current Draw**: *[To be measured]*
-- **Power Connectors**: *[To be documented]*
+- **Power Connectors**: On-board power supply section
+- **Protection**: Two T1.6A fuses
+- **Regulation**: Large capacitors + power transistors (2SB716) on heatsink
 
 ---
 
@@ -70,13 +82,30 @@ For detailed photographs of the PCB and components, see **[PICTURES.md](PICTURES
 - **[Component datasheets to be added as identified]**
 
 ### Service Information
-- **Service Manual**: *[Not currently available]*
-- **Parts Lists**: *[Not currently available]*
-- **Schematic Diagrams**: *[Not currently available - reverse engineering needed]*
+- **Service Manual**: Amstrad DMP1 Service Manual (closest match - re-badged GP-500M-2)
+  - Contains schematics, board callouts, signal timing
+  - Details for 8039/EPROM/6116 configuration
+  - Motor and GP-DR-2 printhead drive specifications
+- **User Manual**: Amstrad DMP1 Owner's Manual
+  - Control/ESC codes, DIP functions, character sets
+  - Compatible with GP-500AS operation
+- **Alternative Reference**: Commodore MPS-801 Technical Manual (re-badged GP-500VC)
+  - Good for mechanics/adjustments and alternative schematics
 
 ### Related Documentation
-- **Seikosha Printer Family**: *[Related models and compatibility information]*
-- **Interface Standards**: *[Era-specific interface standards]*
+- **Seikosha GP-500 Series**: Family includes GP-500A/AT (parallel), GP-500AS (RS-232), GP-500VC (Commodore serial)
+  - Also sold as Amstrad DMP1, Commodore MPS-801, Atari 1029
+  - Shared mechanics, firmware, and GP-DR-2 driver module
+  - Period: ~1984–1986
+- **Performance Specifications**:
+  - 10-inch width, 80-column capacity
+  - ~50 cps draft speed
+  - 9-pin (7 vertical dots per pass) dot matrix
+  - Uses Group 628/1231 ribbon (still available)
+- **Technical References**:
+  - [CPCWiki DMP1 page](https://www.cpcwiki.eu/index.php/Amstrad_DMP1) - Comprehensive documentation
+  - [Service manual downloads](https://www.cpcwiki.eu/index.php/Amstrad_DMP1) - DMP1 and MPS-801 manuals
+  - [Retro-Bobbel MPS-801 docs](https://retro-bobbel.de/) - Alternative technical reference
 
 ---
 
