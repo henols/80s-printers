@@ -7,23 +7,20 @@ This repository documents vintage dot matrix printers from the 1980s era, preser
 ### Nakajima NP-2200
 **9-pin dot matrix printer with NEC 8049 MCU**
 - [Documentation](printers/nakajima-np-2200/)
-- Status: ✅ Documented
 - Architecture: NEC D8049HC + D8155 + D8255
 - Interface: Centronics parallel
 
 ### Diconix Model-150
-**Portable 9-pin dot matrix printer**
+**Portable inkjet printer**
 - [Documentation](printers/diconix-model-150/)
-- Status: 📝 Template created
 - Architecture: *To be documented*
-- Interface: *To be documented*
+- Interface: Centronics parallel
 
 ### Seikosha GP-500AS
 **9-pin dot matrix printer**
 - [Documentation](printers/seikosha-gp-500as/)
-- Status: 📝 Template created
 - Architecture: *To be documented*
-- Interface: *To be documented*
+- Interface: Seriell
 
 ## Common Resources
 
