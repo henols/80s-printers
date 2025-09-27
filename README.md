@@ -17,10 +17,10 @@ This repository documents vintage dot matrix printers from the 1980s era, preser
 - Interface: Centronics parallel
 
 ### Seikosha GP-500AS
-**9-pin dot matrix printer with Intel 8039 MCU**
+**9-pin dot matrix printer with NEC µPD8039H MCU**
 - [Documentation](printers/seikosha-gp-500as/)
-- Architecture: Intel 8039 + 27256 EPROM + dual-port RAM
-- Interface: RS-232C serial
+- Architecture: NEC µPD8039H + 2732 EPROM + serial interface
+- Interface: RS-232C serial (DB-25)
 
 ## Common Resources
 
