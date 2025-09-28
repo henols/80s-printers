@@ -59,10 +59,10 @@ DB9 → DB25
 ### Block A — TXD / RXD
 ```
 +---------+---------+
-| PC TXD  | PR RXD  |   PC TXD = Yellow
-| (Yellow)| (Blue)  |   PC RXD = Blue
-+---------+---------+   PR TXD = Yellow (printer side)
-| PC RXD  | PR TXD  |
+| PC TXD  | PR TXD  |   PC/PR TXD = Yellow
+| (Yellow)| (Blue)  |   PC/PR RXD = Blue
++---------+---------+   
+| PR RXD  | PC TXD  |
 | (Blue)  | (Yellow)|
 +---------+---------+
 ```
@@ -72,10 +72,10 @@ DB9 → DB25
 ### Block B — RTS / CTS
 ```
 +---------+---------+
-| PC RTS  | PR CTS  |   PC RTS = Brown
-| (Brown) | (White) |   PC CTS = White
-+---------+---------+   PR RTS = Brown
-| PC CTS  | PR RTS  |
+| PC RTS  | PR CTS  |   PC/PR RTS = Brown
+| (Brown) | (White) |   PC/PR CTS = White
++---------+---------+   
+| PR RTS  | PC CTS  |
 | (White) | (Brown) |
 +---------+---------+
 ```
@@ -85,10 +85,10 @@ DB9 → DB25
 ### Block C — DTR / DSR
 ```
 +---------+---------+
-| PC DTR  | PR DSR  |   PC DTR = Grey
-| (Grey)  | (Purple)|   PC DSR = Purple
-+---------+---------+   PR DTR = Grey
-| PC DSR  | PR DTR  |
+| PC DTR  | PR DSR  |   PC/PR DTR = Grey
+| (Grey)  | (Purple)|   PC/pr DSR = Purple
++---------+---------+   
+| PR DDR  | PC DSR  |
 | (Purple)| (Grey)  |
 +---------+---------+
 ```
