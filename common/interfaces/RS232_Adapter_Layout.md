@@ -63,7 +63,7 @@ DB9 → DB25
 | (Yellow)| (Blue)  |   PC/PR RXD = Blue
 +---------+---------+   
 | PR RXD  | PC TXD  |
-| (Blue)  | (Yellow)|
+| (Yellow)| (Blue)  |
 +---------+---------+
 ```
 - **Vertical shunts:** PC TXD → PR RXD, PC RXD → PR TXD (straight)
@@ -76,7 +76,7 @@ DB9 → DB25
 | (Brown) | (White) |   PC/PR CTS = White
 +---------+---------+   
 | PR RTS  | PC CTS  |
-| (White) | (Brown) |
+| (Brown) | (White) |
 +---------+---------+
 ```
 - **Vertical shunts:** PC RTS → PR CTS, PC CTS → PR RTS (straight)
@@ -89,7 +89,7 @@ DB9 → DB25
 | (Grey)  | (Purple)|   PC/pr DSR = Purple
 +---------+---------+   
 | PR DDR  | PC DSR  |
-| (Purple)| (Grey)  |
+| (Grey)  | (Purple)|
 +---------+---------+
 ```
 - **Vertical shunts:** PC DTR → PR DSR, PC DSR → PR DTR (straight)
@@ -111,13 +111,3 @@ Shunt locally as needed (e.g. DTR↔DSR, DSR↔DCD).
 ```
 Shunt if printer requires (e.g. DSR↔DCD).
 
----
-
-## Notes
-
-- **GND (Black)** always tied: DB9‑5 ↔ DB25‑7  
-- Use heat‑shrink or tags to mark ends.  
-- Verify with multimeter before powering:  
-  - With Block A vertical → DB9‑2 ↔ DB25‑3, DB9‑3 ↔ DB25‑2  
-  - With Block B horizontal → DB9‑7 ↔ DB25‑5, DB9‑8 ↔ DB25‑4  
-  - With Block C horizontal → DB9‑4 ↔ DB25‑20, DB9‑6 ↔ DB25‑6  
