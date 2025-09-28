@@ -1,17 +1,5 @@
 # Generic RS-232 adapter, Wiring Card
 
-Signal → Color assignment:  
-- **GND:** Black  
-- **TXD:** Yellow  
-- **RXD:** Blue  
-- **RTS:** Brown  
-- **CTS:** White  
-- **DTR:** Grey  
-- **DSR:** Purple  
-- **DCD:** Pink  
-
----
-
 ## Pin Mapping
 
 ```
