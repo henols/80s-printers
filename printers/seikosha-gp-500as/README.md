@@ -41,35 +41,36 @@ For detailed photographs of the PCB and components, see **[PICTURES.md](PICTURES
 - **Diagnostics**: Service mode accessible via switch sequence
 - **Common Failures**: Ribbon wear, driver transistor failure, stepper motor issues
 
-### ICs
+### ICs  
 
-| RefDes | Exact top marking | Manufacturer | Part / Type | Function | Package | Notes |
-|---|---|---|---|---|---|---|
-| P1 | 74LS04 | Various | 2732 EPROM | Firmware storage (4KB) | DIP-24 | Contains character generator, command parser |
-| P2 | 74LS373 | NEC | 8-bit MCU | Main controller | DIP-40 | MCS-48 family, Harvard architecture |
-| P3 | LB1233(2003) | Various | 2K × 8 SRAM | Line buffer/graphics | DIP-24 | Graphics bitmap storage |
-| P4 | MBL8049H | Various | TTL logic | Bus latches/buffers | DIP-14/16 | Timing and state control |
-| P5 | 2732 | Various | Driver array | Printhead solenoids | Various | 9× NPN with flyback diodes |
-| P6 | 7404 | Various | Motor drivers | Stepper control | Various | 4× NPN unipolar drive |
-| P7 | M5L839P-11 | DC motor driver | Various | Motor control | Carriage positioning | Various | With opto position feedback |
-| P8 | HM3-6116-5 |  |  |  |  |  |
-| P9 |  |  |  |  |  |  |
-| P10 |  |  |  |  |  |  |
-| P11 | HM3-6116-5 |  |  |  |  |  |
-| P12 |  |  |  |  |  |  |
-| MGP-DR-2 | GP-DR-2 | Seikosha | Hybrid module | Printhead driver | Custom | High-current solenoid driver |
+| RefDes | Exact top marking | Manufacturer | Part / Type | Function | Package | Notes |  
+|---|---|---|---|---|---|---|  
+| P1 | M74LS04P | Mitsubishi | 74LS04 Hex Inverter | TTL logic, signal inversion | DIP-14 | Used in control logic and oscillator circuits |  
+| P2 | SN74LS373N | Texas Instruments | 74LS373 Octal Transparent Latch | Bus latch | DIP-20 | Buffers data/address lines |  
+| P3 | LB1233 4J5(2003) | Sanyo | LB1233 | Stepper motor driver | DIP-16 | Drives carriage/paper feed stepper motors |  
+| P4 | MBL8049H | Fujitsu (MBL) | Intel 8049 MCU (MCS-48 family) | Main controller | DIP-40 | Executes firmware from external EPROM |  
+| P5 | HN482732AG-20 (label “BASE -2”) | Hitachi | 27256 EPROM (32K × 8) | Firmware storage | DIP-28 | Contains firmware code and printer command set |  
+| P6 | SN7404N | Texas Instruments | 74LS04 Hex Inverter | TTL logic | DIP-14 | Additional inversion/buffering |  
+| P7 | M5L842308P-11 | Mitsubishi | MB842308 | 8K × 8 Dual-Port SRAM | Parallel/serial buffer | DIP-28 | Shared buffer between host interface & MCU |  
+| P8 | HM3-6116-5 | Harris | 6116 2K × 8 SRAM | Working RAM | DIP-24 | General scratchpad / line buffer |  
+| P9 | SN7404H | TI / NEC | 74LS04 Hex Inverter | TTL logic | DIP-14 | Used in timing and strobe circuits |  
+| P10 | SRM2016C20 | Mitsubishi | 6116-class SRAM (2K × 8) | Working RAM | DIP-24 | Buffer memory |  
+| P11 | HM3-6116-5 | Harris | 6116 2K × 8 SRAM | Working RAM | DIP-24 | Same as P8 |  
+| P12 | MB74LS00 | Fujitsu | 74LS00 Quad 2-input NAND | TTL logic | DIP-14 | General control gating |  
+| GP-DR-2 | GP-DR-2 | Seikosha | Custom hybrid driver | Printhead solenoid driver | Custom | Drives high-current printhead pins with protection diodes |
 
 
 ### Connectors
 
 | RefDes | Connector type / style | Pins / rows  | Notes |
 |---|---|---|---|
-| J1 | DB-25 male | 2×13 | RS-232C serial interface |
-| J2 | Mains power inlet | 3-pin | Region-specific AC input |
-| J3 | Internal stepper motor | 6-pin | Paper feed mechanism |
-| J4 | Internal carriage motor | 4-pin | DC motor with position feedback |
-| J5 | Printhead solenoid array | 9-pin | Dot impact mechanism |
-| SW1-4 | DIP switch bank | 4-position | Character set and CR/LF configuration |
+| CN1 | DB-25 female |  | parallel |
+| CN2 | Control panel| 6-pin |  |
+| CN3 | Internal stepper motor | 8-pin | Paper feed mechanism |
+| CN4 | Internal carriage motor | 8-pin | DC motor with position feedback |
+| CN5 | Printhead solenoid array | 3-pin | Dot impact mechanism |
+| CN6 | Mains power inlet | 6-pin | Region-specific AC input |
+| DIPSW | DIP switch bank | 8-position | Character set and CR/LF configuration |
 
 ---
 
