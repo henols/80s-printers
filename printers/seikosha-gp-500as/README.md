@@ -45,15 +45,20 @@ For detailed photographs of the PCB and components, see **[PICTURES.md](PICTURES
 
 | RefDes | Exact top marking | Manufacturer | Part / Type | Function | Package | Notes |
 |---|---|---|---|---|---|---|
-| U1 | 2732 "8DE-1" | Various | 2732 EPROM | Firmware storage (4KB) | DIP-24 | Contains character generator, command parser |
-| U2 | µPD8039H | NEC | 8-bit MCU | Main controller | DIP-40 | MCS-48 family, Harvard architecture |
-| U3 | 6116 | Various | 2K × 8 SRAM | Line buffer/graphics | DIP-24 | Graphics bitmap storage |
-| U4 | 74LS series | Various | TTL logic | Bus latches/buffers | DIP-14/16 | Timing and state control |
-| U5 | Transistor array | Various | Driver array | Printhead solenoids | Various | 9× NPN with flyback diodes |
-| U6 | H-bridge stages | Various | Motor drivers | Stepper control | Various | 4× NPN unipolar drive |
-| U7 | DC motor driver | Various | Motor control | Carriage positioning | Various | With opto position feedback |
-| M1 | GP-DR-2 | Seikosha | Hybrid module | Printhead driver | Custom | High-current solenoid driver |
-| PSU | Power supply | Various | Regulation | +5V logic, +24V motors | Various | Internal switching supply |
+| P1 | 74LS04 | Various | 2732 EPROM | Firmware storage (4KB) | DIP-24 | Contains character generator, command parser |
+| P2 | 74LS373 | NEC | 8-bit MCU | Main controller | DIP-40 | MCS-48 family, Harvard architecture |
+| P3 | LB1233(2003) | Various | 2K × 8 SRAM | Line buffer/graphics | DIP-24 | Graphics bitmap storage |
+| P4 | MBL8049H | Various | TTL logic | Bus latches/buffers | DIP-14/16 | Timing and state control |
+| P5 | 2732 | Various | Driver array | Printhead solenoids | Various | 9× NPN with flyback diodes |
+| P6 | 7404 | Various | Motor drivers | Stepper control | Various | 4× NPN unipolar drive |
+| P7 | M5L839P-11 | DC motor driver | Various | Motor control | Carriage positioning | Various | With opto position feedback |
+| P8 | HM3-6116-5 |  |  |  |  |  |
+| P9 |  |  |  |  |  |  |
+| P10 |  |  |  |  |  |  |
+| P11 | HM3-6116-5 |  |  |  |  |  |
+| P12 |  |  |  |  |  |  |
+| MGP-DR-2 | GP-DR-2 | Seikosha | Hybrid module | Printhead driver | Custom | High-current solenoid driver |
+
 
 ### Connectors
 
